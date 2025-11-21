@@ -17,11 +17,16 @@ abstract class SVGElementWrapper {
 export class SVG {
   private element: SVGElement;
 
-  constructor(width: number = 800, height: number = 600, tag: string = 'svg') {
-    this.element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  constructor(width: number = 800, height: number = 600) {
+    this.element = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.element.setAttribute('width', width.toString());
     this.element.setAttribute('height', height.toString());
     this.element.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  }
+
+  cssClass(className: string) {
+    this.element.setAttribute('class', className);
+    return this;
   }
 
   appendTo(parent: HTMLElement) {
