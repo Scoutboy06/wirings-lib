@@ -1,6 +1,7 @@
 import type Component from './components';
 import AndGate from './components/AndGate';
 import { GateInput, GateOutput } from './components/gates';
+import NandGate from './components/NandGate';
 import NotGate from './components/NotGate';
 import { Wire } from './components/Wire';
 import { lightTheme, type Theme } from './themes';
@@ -56,6 +57,7 @@ export default class WiringDiagram {
         fill: ${this._theme.component.textColor};
         font-size: 24px;
         pointer-events: none;
+        user-select: none;
       }
 
       .wiring-diagram .wire {
@@ -81,6 +83,10 @@ export default class WiringDiagram {
 
   andGate(): AndGate {
     return new AndGate(this);
+  }
+
+  nandGate(): NandGate {
+    return new NandGate(this);
   }
 
   connect(input: GateInput, output: GateOutput): void;
