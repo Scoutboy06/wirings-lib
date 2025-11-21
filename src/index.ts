@@ -3,6 +3,7 @@ import AndGate from "./components/AndGate";
 import type { GateInput, GateOutput } from "./components/gates";
 import NandGate from "./components/NandGate";
 import NotGate from "./components/NotGate";
+import UserInputBit from "./components/UserInputBit";
 import { Wire } from "./components/Wire";
 import { lightTheme, type Theme } from "./themes";
 import { SVG } from "./utils/Svg";
@@ -94,6 +95,16 @@ export default class WiringDiagram {
         stroke: ${this._theme.wire.stroke};
         fill: ${this._theme.wire.onColor};
       }
+
+			.wiring-diagram .user-input-bit {
+				fill: ${this._theme.userInputBit.inactiveFill};
+				stroke: ${this._theme.userInputBit.inactiveStroke};
+			}
+
+			.wiring-diagram .user-input-bit.active {
+				fill: ${this._theme.userInputBit.activeFill};
+				stroke: ${this._theme.userInputBit.activeStroke};
+			}
     `;
 		defsElement.appendChild(styleElement);
 		svg.addElement(defsElement);
@@ -115,6 +126,10 @@ export default class WiringDiagram {
 
 	nandGate(): NandGate {
 		return new NandGate(this);
+	}
+
+	userInputBit(): UserInputBit {
+		return new UserInputBit(this);
 	}
 
 	connect(input: GateInput, output: GateOutput, options?: ConnectOptions): void;
