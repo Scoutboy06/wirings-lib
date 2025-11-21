@@ -3,6 +3,7 @@ import { SvgCircle, SvgGroup, SvgRect, SvgText } from '@lib/utils/Svg';
 import Vec2 from '@lib/utils/Vec2';
 import Component from '.';
 import type WiringDiagram from '..';
+import { GateInput, GateOutput } from './gates';
 
 type Orientation = 'right'; // | 'left' | 'up' | 'down';
 
@@ -10,7 +11,7 @@ export default class NotGate extends Component {
   private _pos?: Vec2;
   private width: number;
   private height: number;
-  private _orientation?: Orientation;
+  private _orientation?: Orientation = 'right';
 
   constructor(diagram: WiringDiagram) {
     super(diagram);
@@ -28,8 +29,23 @@ export default class NotGate extends Component {
     return this;
   }
   
-  insert() {
+  insert(): NotGate {
     this.diagram.addComponent(this);
+    return this;
+  }
+
+  input(): GateInput {
+    if (!this._pos) {
+      throw new Error('Position must be set before getting input.');
+    }
+    return new GateInput(this).pos(this._pos.x+2, this._pos.y + this.height / 2);
+  }
+
+  output(): GateOutput {
+    if (!this._pos) {
+      throw new Error('Position must be set before getting output.');
+    }
+    return new GateOutput(this).pos(this._pos.x + this.width*0.9, this._pos.y + this.height / 2);
   }
 
   getSvgElement(theme: Theme): SVGGElement {
