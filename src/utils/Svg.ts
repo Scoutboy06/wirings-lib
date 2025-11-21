@@ -1,0 +1,287 @@
+import Vec2 from './Vec2';
+
+type AnchorPoint = 'start' | 'middle' | 'end';
+
+abstract class SVGElementWrapper {
+  protected _anchorX: AnchorPoint = 'start';
+  protected _anchorY: AnchorPoint = 'start';
+  abstract createElement(): SVGElement;
+}
+
+export class SVG {
+  private element: SVGElement;
+
+  constructor(width: number = 800, height: number = 600, tag: string = 'svg') {
+    this.element = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    this.element.setAttribute('width', width.toString());
+    this.element.setAttribute('height', height.toString());
+    this.element.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  }
+
+  appendTo(parent: HTMLElement) {
+    parent.appendChild(this.element);
+  }
+
+  addElement(element: SVGElement) {
+    this.element.appendChild(element);
+  }
+}
+
+export class SvgPath extends SVGElementWrapper {
+  private d: string;
+  private _stroke?: string;
+  private _strokeWidth?: number;
+  private _fill?: string;
+
+  constructor() {
+    super();
+    this.d = '';
+  }
+
+  moveTo(x: number, y: number) {
+    this.d += `M${x} ${y} `;
+    return this;
+  }
+
+  lineTo(x: number, y: number) {
+    this.d += `L${x} ${y} `;
+    return this;
+  }
+
+  close() {
+    this.d += 'Z ';
+    return this;
+  }
+
+  stroke(color: string) {
+    this._stroke = color;
+    return this;
+  }
+
+  strokeWidth(width: number) {
+    this._strokeWidth = width;
+    return this;
+  }
+
+  fill(color: string) {
+    this._fill = color;
+    return this;
+  }
+
+  getPathString() {
+    return this.d.trim();
+  }
+
+  createElement() {
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    path.setAttribute('d', this.getPathString());
+    if (this._stroke) {
+      path.setAttribute('stroke', this._stroke);
+    }
+    if (this._strokeWidth) {
+      path.setAttribute('stroke-width', this._strokeWidth.toString());
+    }
+    if (this._fill) {
+      path.setAttribute('fill', this._fill);
+    }
+    return path;
+  }
+}
+
+export class SvgRect extends SVGElementWrapper {
+  private _pos?: Vec2;
+  private _width?: number
+  private _height?: number;
+  private _fillColor?: string
+  private _strokeColor?: string;
+  private _strokeWidth?: number;
+
+  pos(x: number, y: number) {
+    this._pos = new Vec2(x, y);
+    return this;
+  }
+
+  width(width: number) {
+    this._width = width;
+    return this;
+  }
+
+  height(height: number) {
+    this._height = height;
+    return this;
+  }
+
+  fill(color: string) {
+    this._fillColor = color;
+    return this;
+  }
+
+  stroke(color: string) {
+    this._strokeColor = color;
+    return this;
+  }
+
+  strokeWidth(width: number) {
+    this._strokeWidth = width;
+    return this;
+  }
+
+  createElement(): SVGRectElement {
+    if (!this._pos || this._width === undefined || this._height === undefined) {
+      throw new Error('Position, width, and height must be set before creating rect element.');
+    }
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', this._pos.x.toString());
+    rect.setAttribute('y', this._pos.y.toString());
+    rect.setAttribute('width', this._width.toString());
+    rect.setAttribute('height', this._height.toString());
+    if (this._fillColor) {
+      rect.setAttribute('fill', this._fillColor);
+    }
+    if (this._strokeColor) {
+      rect.setAttribute('stroke', this._strokeColor);
+    }
+    if (this._strokeWidth !== undefined) {
+      rect.setAttribute('stroke-width', this._strokeWidth.toString());
+    }
+    return rect;
+  }
+}
+
+export class SvgCircle extends SVGElementWrapper {
+  private _center?: Vec2;
+  private _radius?: number;
+  private _fillColor?: string;
+  private _strokeColor?: string;
+  private _strokeWidth?: number;
+
+  center(x: number, y: number) {
+    this._center = new Vec2(x, y);
+    return this;
+  }
+
+  radius(radius: number) {
+    this._radius = radius;
+    return this;
+  }
+
+  fill(color: string) {
+    this._fillColor = color;
+    return this;
+  }
+
+  stroke(color: string) {
+    this._strokeColor = color;
+    return this;
+  }
+
+  strokeWidth(width: number) {
+    this._strokeWidth = width;
+    return this;
+  }
+
+  createElement(): SVGElement {
+    if (!this._center || this._radius === undefined) {
+      throw new Error('Center and radius must be set before creating circle element.');
+    }
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', this._center.x.toString());
+    circle.setAttribute('cy', this._center.y.toString());
+    circle.setAttribute('r', this._radius.toString());
+    if (this._fillColor) {
+      circle.setAttribute('fill', this._fillColor);
+    }
+    if (this._strokeColor) {
+      circle.setAttribute('stroke', this._strokeColor);
+    }
+    if (this._strokeWidth !== undefined) {
+      circle.setAttribute('stroke-width', this._strokeWidth.toString());
+    }
+    return circle;
+  }
+}
+
+export class SvgText extends SVGElementWrapper {
+  private _content: string;
+  private _pos?: Vec2;
+  private _fontSize?: number;
+  private _fillColor?: string;
+
+  constructor(content: string) {
+    super();
+    this._content = content;
+  }
+
+  pos(x: number, y: number) {
+    this._pos = new Vec2(x, y);
+    return this;
+  }
+
+  anchorX(anchor: AnchorPoint) {
+    this._anchorX = anchor;
+    return this;
+  }
+
+  anchorY(anchor: AnchorPoint) {
+    this._anchorY = anchor;
+    return this;
+  }
+
+  fontSize(size: number) {
+    this._fontSize = size;
+    return this;
+  }
+  
+  fill(color: string) {
+    this._fillColor = color;
+    return this;
+  }
+
+  createElement() {
+    if (!this._pos) {
+      throw new Error('Position must be set before creating text element.');
+    }
+
+    const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    textEl.textContent = this._content;
+    if (this._fontSize) {
+      textEl.setAttribute('font-size', this._fontSize.toString());
+    }
+    if (this._fillColor) {
+      textEl.setAttribute('fill', this._fillColor);
+    }
+
+    textEl.setAttribute('x', this._pos.x.toString());
+    textEl.setAttribute('y', this._pos.y.toString());
+
+    const anchorXMap: Record<AnchorPoint, string> = {
+      start: 'start',
+      middle: 'middle',
+      end: 'end',
+    };
+    textEl.setAttribute('text-anchor', anchorXMap[this._anchorX]);
+
+    const anchorYMap: Record<AnchorPoint, string> = {
+      start: 'auto',
+      middle: 'central',
+      end: 'hanging',
+    };
+    textEl.setAttribute('dominant-baseline', anchorYMap[this._anchorY]);
+    return textEl;
+  }
+}
+
+export class SvgGroup extends SVGElementWrapper {
+  private elements: SVGElement[] = [];
+
+  addElement(element: SVGElement) {
+    this.elements.push(element);
+    return this;
+  }
+
+  createElement() {
+    const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    this.elements.forEach(el => group.appendChild(el));
+    return group;
+  }
+}
