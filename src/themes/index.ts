@@ -8,6 +8,7 @@ export interface Theme {
   wire: {
     stroke: string;
     strokeWidth: number;
+    onColor: string;
   }
 }
 
@@ -21,6 +22,7 @@ export const lightTheme: Theme = {
   wire: {
     stroke: "#000000",
     strokeWidth: 2,
+    onColor: "#000080",
   }
 };
 
@@ -54,5 +56,6 @@ export const tokyonightNightTheme: Theme = {
   wire: {
     stroke: tokyonightNightPalette.purple,
     strokeWidth: 4,
+    onColor: tokyonightNightPalette.aqua,
   }
 };
