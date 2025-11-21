@@ -1,15 +1,16 @@
-import { SvgCircle, SvgGroup, SvgRect, SvgText } from '@lib/utils/Svg';
-import Vec2 from '@lib/utils/Vec2';
+import type { Theme } from '@lib/themes';
+import { SvgGroup, SvgRect, SvgText } from '@lib/utils/Svg';
+import type Vec2 from '@lib/utils/Vec2';
 import Component from '.';
 import type WiringDiagram from '..';
 import { GateInput, GateOutput } from './gates';
 
 type Orientation = 'right'; // | 'left' | 'up' | 'down';
 
-export default class NotGate extends Component {
+export default class AndGate extends Component {
   private _pos?: Vec2;
-  private width: number;
-  private height: number;
+  private width: number
+  private height: number
   private _orientation?: Orientation = 'right';
 
   constructor(diagram: WiringDiagram) {
@@ -18,33 +19,39 @@ export default class NotGate extends Component {
     this.height = 40;
   }
 
-  pos(x: number, y: number): NotGate {
-    this._pos = new Vec2(x, y);
+  pos(x: number, y: number): AndGate {
+    this._pos = {x, y};
     return this;
   }
 
-  orientation(orientation: Orientation): NotGate {
+  orientation(orientation: Orientation): AndGate {
     this._orientation = orientation;
     return this;
   }
-  
-  insert(): NotGate {
+
+  insert(): AndGate {
     this.diagram.addComponent(this);
     return this;
   }
 
-  input(): GateInput {
+  inputs(idx: number): GateInput | null {
     if (!this._pos) {
-      throw new Error('Position must be set before getting input.');
+      throw new Error('Position must be set before getting inputs.');
     }
-    return new GateInput(this).pos(this._pos.x+2, this._pos.y + this.height / 2);
+    if (idx === 0) {
+      return new GateInput(this).pos(this._pos.x+2, this._pos.y + this.height / 3);
+    }
+    if (idx === 1) {
+      return new GateInput(this).pos(this._pos.x+2, this._pos.y + (2 * this.height) / 3);
+    }
+    return null;
   }
 
   output(): GateOutput {
     if (!this._pos) {
       throw new Error('Position must be set before getting output.');
     }
-    return new GateOutput(this).pos(this._pos.x + this.width*0.9, this._pos.y + this.height / 2);
+    return new GateOutput(this).pos(this._pos.x + this.width - 2, this._pos.y + this.height / 2);
   }
 
   getSvgElement(): SVGGElement {
@@ -52,31 +59,25 @@ export default class NotGate extends Component {
       throw new Error('Position and orientation must be set before inserting the component.');
     }
 
+    const group = new SvgGroup();
+
     const {x, y} = this._pos;
     const w = this.width;
     const h = this.height;
 
-    const g = new SvgGroup();
-    
     const rect = new SvgRect()
       .pos(x, y)
-      .size(w * 0.8, h)
+      .size(w, h)
       .cssClass('component-body');
-    g.addElement(rect.createElement());
+    group.addElement(rect.createElement());
 
-    const text = new SvgText('1')
-      .pos(x + w*0.8 / 2, y + h / 2)
+    const text = new SvgText('&')
+      .pos(x + w / 2, y + h / 2)
       .anchorX('middle')
       .anchorY('middle')
       .cssClass('component-text');
-    g.addElement(text.createElement());
+    group.addElement(text.createElement());
 
-    const circle = new SvgCircle()
-      .center(x + w*0.9, y + h / 2)
-      .radius(w*0.1)
-      .cssClass('component-body');
-    g.addElement(circle.createElement());
-
-    return g.createElement();
+    return group.createElement();
   }
 }

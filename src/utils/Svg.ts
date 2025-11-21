@@ -5,7 +5,13 @@ type AnchorPoint = 'start' | 'middle' | 'end';
 abstract class SVGElementWrapper {
   protected _anchorX: AnchorPoint = 'start';
   protected _anchorY: AnchorPoint = 'start';
+  protected _cssClass?: string;
   abstract createElement(): SVGElement;
+
+  cssClass(className: string) {
+    this._cssClass = className;
+    return this;
+  }
 }
 
 export class SVG {
@@ -84,6 +90,9 @@ export class SvgPath extends SVGElementWrapper {
     if (this._fill) {
       path.setAttribute('fill', this._fill);
     }
+    if (this._cssClass) {
+      path.setAttribute('class', this._cssClass);
+    }
     return path;
   }
 }
@@ -98,6 +107,12 @@ export class SvgRect extends SVGElementWrapper {
 
   pos(x: number, y: number) {
     this._pos = new Vec2(x, y);
+    return this;
+  }
+
+  size(width: number, height: number) {
+    this._width = width;
+    this._height = height;
     return this;
   }
 
@@ -144,6 +159,9 @@ export class SvgRect extends SVGElementWrapper {
     if (this._strokeWidth !== undefined) {
       rect.setAttribute('stroke-width', this._strokeWidth.toString());
     }
+    if (this._cssClass) {
+      rect.setAttribute('class', this._cssClass);
+    }
     return rect;
   }
 }
@@ -151,9 +169,6 @@ export class SvgRect extends SVGElementWrapper {
 export class SvgCircle extends SVGElementWrapper {
   private _center?: Vec2;
   private _radius?: number;
-  private _fillColor?: string;
-  private _strokeColor?: string;
-  private _strokeWidth?: number;
 
   center(x: number, y: number) {
     this._center = new Vec2(x, y);
@@ -165,21 +180,6 @@ export class SvgCircle extends SVGElementWrapper {
     return this;
   }
 
-  fill(color: string) {
-    this._fillColor = color;
-    return this;
-  }
-
-  stroke(color: string) {
-    this._strokeColor = color;
-    return this;
-  }
-
-  strokeWidth(width: number) {
-    this._strokeWidth = width;
-    return this;
-  }
-
   createElement(): SVGElement {
     if (!this._center || this._radius === undefined) {
       throw new Error('Center and radius must be set before creating circle element.');
@@ -188,14 +188,8 @@ export class SvgCircle extends SVGElementWrapper {
     circle.setAttribute('cx', this._center.x.toString());
     circle.setAttribute('cy', this._center.y.toString());
     circle.setAttribute('r', this._radius.toString());
-    if (this._fillColor) {
-      circle.setAttribute('fill', this._fillColor);
-    }
-    if (this._strokeColor) {
-      circle.setAttribute('stroke', this._strokeColor);
-    }
-    if (this._strokeWidth !== undefined) {
-      circle.setAttribute('stroke-width', this._strokeWidth.toString());
+    if (this._cssClass) {
+      circle.setAttribute('class', this._cssClass);
     }
     return circle;
   }
@@ -204,8 +198,6 @@ export class SvgCircle extends SVGElementWrapper {
 export class SvgText extends SVGElementWrapper {
   private _content: string;
   private _pos?: Vec2;
-  private _fontSize?: number;
-  private _fillColor?: string;
 
   constructor(content: string) {
     super();
@@ -227,16 +219,6 @@ export class SvgText extends SVGElementWrapper {
     return this;
   }
 
-  fontSize(size: number) {
-    this._fontSize = size;
-    return this;
-  }
-  
-  fill(color: string) {
-    this._fillColor = color;
-    return this;
-  }
-
   createElement() {
     if (!this._pos) {
       throw new Error('Position must be set before creating text element.');
@@ -244,12 +226,6 @@ export class SvgText extends SVGElementWrapper {
 
     const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     textEl.textContent = this._content;
-    if (this._fontSize) {
-      textEl.setAttribute('font-size', this._fontSize.toString());
-    }
-    if (this._fillColor) {
-      textEl.setAttribute('fill', this._fillColor);
-    }
 
     textEl.setAttribute('x', this._pos.x.toString());
     textEl.setAttribute('y', this._pos.y.toString());
@@ -267,6 +243,11 @@ export class SvgText extends SVGElementWrapper {
       end: 'hanging',
     };
     textEl.setAttribute('dominant-baseline', anchorYMap[this._anchorY]);
+
+    if (this._cssClass) {
+      textEl.setAttribute('class', this._cssClass);
+    }
+
     return textEl;
   }
 }
@@ -282,6 +263,9 @@ export class SvgGroup extends SVGElementWrapper {
   createElement() {
     const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     this.elements.forEach(el => group.appendChild(el));
+    if (this._cssClass) {
+      group.setAttribute('class', this._cssClass);
+    }
     return group;
   }
 }

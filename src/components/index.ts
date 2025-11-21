@@ -1,4 +1,3 @@
-import type { Theme } from '@lib/themes';
 import type WiringDiagram from '..';
 
 export default abstract class Component {
@@ -8,5 +7,5 @@ export default abstract class Component {
     this.diagram = diagram;
   }
   
-  abstract getSvgElement(theme: Theme): SVGElement;
+  abstract getSvgElement(): SVGElement;
 }

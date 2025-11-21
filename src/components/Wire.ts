@@ -1,4 +1,3 @@
-import type { Theme } from '@lib/themes';
 import { SvgGroup, SvgPath } from '@lib/utils/Svg';
 import Vec2 from '@lib/utils/Vec2';
 import Component from '.';
@@ -31,7 +30,7 @@ export class Wire extends Component {
     return this;
   }
 
-  getSvgElement(theme: Theme): SVGGElement {
+  getSvgElement(): SVGGElement {
     const group = new SvgGroup();
 
     if(this.vertices.length === 0) {
@@ -40,15 +39,12 @@ export class Wire extends Component {
     }
 
     const path = new SvgPath()
-      .moveTo(this.vertices[0]._pos.x, this.vertices[0]._pos.y);
+      .moveTo(this.vertices[0]._pos.x, this.vertices[0]._pos.y)
+      .cssClass('wire');
     
     this.vertices.slice(1).forEach(vertex => {
       path.lineTo(vertex._pos.x, vertex._pos.y);
     });
-
-    path.stroke(theme.wire.stroke)
-      .strokeWidth(theme.wire.strokeWidth)
-      .fill('none');
 
     group.addElement(path.createElement());
 

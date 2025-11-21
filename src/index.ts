@@ -1,4 +1,5 @@
 import type Component from './components';
+import AndGate from './components/AndGate';
 import { GateInput, GateOutput } from './components/gates';
 import NotGate from './components/NotGate';
 import { Wire } from './components/Wire';
@@ -36,12 +37,36 @@ export default class WiringDiagram {
 
     wires.forEach(component => {
       console.log(component);
-      svg.addElement(component.getSvgElement(this._theme));
+      svg.addElement(component.getSvgElement());
     });
     nonWires.forEach(component => {
       console.log(component);
-      svg.addElement(component.getSvgElement(this._theme));
+      svg.addElement(component.getSvgElement());
     });
+
+    const defsElement = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    const styleElement = document.createElement('style');
+    styleElement.textContent = `
+      .component-body {
+        fill: ${this._theme.component.fill};
+        stroke: ${this._theme.component.stroke};
+      }
+
+      .component-text {
+        fill: ${this._theme.component.textColor};
+        font-size: 24px;
+        pointer-events: none;
+      }
+
+      .wire {
+        stroke: ${this._theme.wire.stroke};
+        stroke-width: ${this._theme.wire.strokeWidth}px;
+        fill: none;
+        filter: drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.7));
+      }
+    `;
+    defsElement.appendChild(styleElement);
+    svg.addElement(defsElement);
 
     svg.appendTo(target as HTMLElement);
   }
@@ -52,6 +77,10 @@ export default class WiringDiagram {
 
   notGate(): NotGate {
     return new NotGate(this);
+  }
+
+  andGate(): AndGate {
+    return new AndGate(this);
   }
 
   connect(input: GateInput, output: GateOutput): void;
