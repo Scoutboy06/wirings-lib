@@ -2,33 +2,41 @@ import { SvgCircle, SvgGroup, SvgPath } from "@lib/utils/Svg";
 import Vec2 from "@lib/utils/Vec2";
 import Component from ".";
 import type WiringDiagram from "..";
-import type { GateInput, GateOutput } from "./gates";
+import type { GateIO } from "./gates";
 
 export class WireVertex {
-	node?: GateInput | GateOutput;
+	private wire: Wire;
 	readonly _pos: Vec2;
+	private idx: number;
 
-	constructor(x: number, y: number, node: GateInput | GateOutput) {
+	constructor(wire: Wire, x: number, y: number, idx: number) {
+		this.wire = wire;
 		this._pos = new Vec2(x, y);
-		this.node = node;
+		this.idx = idx;
+	}
+
+	enable(): void {
+		this.wire.setState(true);
+		this.wire.update();
 	}
 }
 
 export class Wire extends Component {
-	vertices: WireVertex[] = [];
+	vertices: (WireVertex | GateIO)[] = [];
 	state = false;
-	readonly id: string;
 
 	constructor(diagram: WiringDiagram) {
 		super(diagram);
-		this.id = `wire-${diagram.nextId()}`;
+		this.id = `wire-${this.id}`;
 	}
 
-	via(node: GateInput | GateOutput): Wire {
+	via(node: GateIO): Wire {
 		if (!node._pos) {
 			throw new Error("Node position is not set");
 		}
-		this.vertices.push(new WireVertex(node._pos.x, node._pos.y, node));
+		this.vertices.push(
+			new WireVertex(this, node._pos.x, node._pos.y, this.vertices.length),
+		);
 		return this;
 	}
 
@@ -36,6 +44,8 @@ export class Wire extends Component {
 		this.state = state;
 		return this;
 	}
+
+	update(): void {}
 
 	private getElectrons(): SvgPath[] {
 		const electrons: SvgPath[] = [];

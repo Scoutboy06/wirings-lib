@@ -2,7 +2,7 @@ import { SvgGroup, SvgRect, SvgText } from "@lib/utils/Svg";
 import Vec2 from "@lib/utils/Vec2";
 import Component from ".";
 import type WiringDiagram from "..";
-import { GateInput, GateOutput } from "./gates";
+import { GateIO } from "./gates";
 
 type Orientation = "right"; // | 'left' | 'up' | 'down';
 
@@ -11,11 +11,15 @@ export default class AndGate extends Component {
 	private width: number;
 	private height: number;
 	private _orientation?: Orientation = "right";
+	private _inputs: [GateIO, GateIO];
+	private _output: GateIO;
 
 	constructor(diagram: WiringDiagram) {
 		super(diagram);
 		this.width = 40;
 		this.height = 40;
+		this._inputs = [new GateIO(diagram, this), new GateIO(diagram, this)];
+		this._output = new GateIO(diagram, this);
 	}
 
 	pos(x: number, y: number): AndGate {
@@ -33,33 +37,39 @@ export default class AndGate extends Component {
 		return this;
 	}
 
-	inputs(idx: 0 | 1): GateInput {
+	inputs(idx: 0 | 1): GateIO {
 		if (!this._pos) {
 			throw new Error("Position must be set before getting inputs.");
 		}
-
 		if (idx === 0) {
-			return new GateInput(this).pos(
-				this._pos.x + 2,
-				this._pos.y + this.height / 3,
-			);
+			return this._inputs[0].pos(this._pos.x, this._pos.y + this.height / 3);
 		} else if (idx === 1) {
-			return new GateInput(this).pos(
-				this._pos.x + 2,
+			return this._inputs[1].pos(
+				this._pos.x,
 				this._pos.y + (2 * this.height) / 3,
 			);
 		}
+
 		throw new Error("Invalid input index for AND gate. Must be 0 or 1.");
 	}
 
-	output(): GateOutput {
+	output(): GateIO {
 		if (!this._pos) {
 			throw new Error("Position must be set before getting output.");
 		}
-		return new GateOutput(this).pos(
-			this._pos.x + this.width - 2,
+		return this._output.pos(
+			this._pos.x + this.width,
 			this._pos.y + this.height / 2,
 		);
+	}
+
+	update(): void {
+		const newState = this._inputs[0].state && this._inputs[1].state;
+		const oldState = this.output().state;
+
+		if (newState === oldState) return;
+
+		this.output().setState(newState);
 	}
 
 	getSvgElement(): SVGGElement {

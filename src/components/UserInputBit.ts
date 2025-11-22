@@ -2,16 +2,18 @@ import { SvgCircle } from "@lib/utils/Svg";
 import Vec2 from "@lib/utils/Vec2";
 import Component from ".";
 import type WiringDiagram from "..";
-import { GateOutput } from "./gates";
+import { GateIO } from "./gates";
 
 export default class UserInputBit extends Component {
 	private _pos?: Vec2;
 	private _radius: number;
 	private _active: boolean = false;
+	private _output: GateIO;
 
 	constructor(diagram: WiringDiagram) {
 		super(diagram);
 		this._radius = 10;
+		this._output = new GateIO(this, "output");
 	}
 
 	pos(x: number, y: number): UserInputBit {
@@ -24,11 +26,11 @@ export default class UserInputBit extends Component {
 		return this;
 	}
 
-	output(): GateOutput {
+	output(): GateIO {
 		if (!this._pos) {
 			throw new Error("Position must be set before getting output.");
 		}
-		return new GateOutput(this).pos(
+		return this._output.pos(
 			this._pos.x + this._radius * 2 - 4,
 			this._pos.y + this._radius,
 		);
@@ -37,6 +39,11 @@ export default class UserInputBit extends Component {
 	active(active: boolean): UserInputBit {
 		this._active = active;
 		return this;
+	}
+
+	update(): void {
+		this._output.setState(this._active);
+		this._output.update();
 	}
 
 	getSvgElement(): SVGElement {

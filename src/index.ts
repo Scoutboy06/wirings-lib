@@ -1,6 +1,6 @@
 import type Component from "./components";
 import AndGate from "./components/AndGate";
-import type { GateInput, GateOutput } from "./components/gates";
+import type { GateIO } from "./components/gates";
 import NandGate from "./components/NandGate";
 import NotGate from "./components/NotGate";
 import UserInputBit from "./components/UserInputBit";
@@ -22,11 +22,12 @@ export default class WiringDiagram {
 	private components: Component[] = [];
 	private _theme: Theme = lightTheme;
 	private _nextId: number = 0;
+	private interactive: boolean;
 
-	constructor(width: number, height: number) {
+	constructor(width: number, height: number, interactive = false) {
 		this.width = width;
 		this.height = height;
-		this.components = [];
+		this.interactive = interactive;
 	}
 
 	draw(targetSelector: string) {
@@ -132,11 +133,9 @@ export default class WiringDiagram {
 		return new UserInputBit(this);
 	}
 
-	connect(input: GateInput, output: GateOutput, options?: ConnectOptions): void;
-	connect(output: GateOutput, input: GateInput, options?: ConnectOptions): void;
 	connect(
-		a: GateInput | GateOutput,
-		b: GateInput | GateOutput,
+		a: GateIO,
+		b: GateIO,
 		options: ConnectOptions = defaultOptions,
 	): void {
 		const wire = new Wire(this).via(a).via(b).setState(options.on);
@@ -149,5 +148,13 @@ export default class WiringDiagram {
 
 	nextId(): number {
 		return this._nextId++;
+	}
+
+	runSimulation() {
+		this.components
+			.filter((c) => !(c instanceof Wire))
+			.forEach((component) => {
+				component.update();
+			});
 	}
 }

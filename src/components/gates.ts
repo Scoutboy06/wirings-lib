@@ -1,33 +1,43 @@
-import Vec2 from '@lib/utils/Vec2';
-import type Component from '.';
-import type { Wire } from './Wire';
+import Vec2 from "@lib/utils/Vec2";
+import Component from ".";
+import type WiringDiagram from "..";
+import type { WireVertex } from "./Wire";
 
-export class GateInput {
-  readonly owner: Component;
-  connections: Wire[] = [];
-  _pos?: Vec2;
+export class GateIO {
+	readonly owner: Component;
+	private isInput: boolean;
+	connections: WireVertex[] = [];
+	private _state = false;
+	_pos?: Vec2;
 
-  constructor(owner: Component) {
-    this.owner = owner;
-  }
+	constructor(owner: Component, type: "input" | "output") {
+		this.owner = owner;
+		this.isInput = type === "input";
+	}
 
-  pos(x: number, y: number) {
-    this._pos = new Vec2(x, y);
-    return this;
-  }
-}
+	pos(x: number, y: number) {
+		this._pos = new Vec2(x, y);
+		return this;
+	}
 
-export class GateOutput {
-  readonly owner: Component;
-  connections: Wire[] = [];
-  _pos?: Vec2;
+	get state(): boolean {
+		return this._state;
+	}
 
-  constructor(owner: Component) {
-    this.owner = owner;
-  }
+	setState(newState: boolean) {
+		this._state = newState;
+	}
 
-  pos(x: number, y: number) {
-    this._pos = new Vec2(x, y);
-    return this;
-  }
+	update(): void {
+		if (this.isInput) {
+			this.owner.update();
+		}
+
+		for (const connection of this.connections) {
+		}
+	}
+
+	getSvgElement(): SVGElement {
+		throw new Error("Method not implemented.");
+	}
 }
