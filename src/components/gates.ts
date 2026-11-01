@@ -1,6 +1,5 @@
 import Vec2 from "@lib/utils/Vec2";
-import Component from ".";
-import type WiringDiagram from "..";
+import type Component from ".";
 import type { WireVertex } from "./Wire";
 
 export class GateIO {
@@ -20,6 +19,10 @@ export class GateIO {
 		return this;
 	}
 
+	connect(vertex: WireVertex): void {
+		this.connections.push(vertex);
+	}
+
 	get state(): boolean {
 		return this._state;
 	}
@@ -32,8 +35,12 @@ export class GateIO {
 		if (this.isInput) {
 			this.owner.update();
 		}
+		console.log("IO update:", this);
 
-		for (const connection of this.connections) {
+		if (this._state) {
+			for (const connection of this.connections) {
+				connection.enable();
+			}
 		}
 	}
 

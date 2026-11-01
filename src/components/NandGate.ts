@@ -66,6 +66,10 @@ export default class NandGate extends Component {
 		);
 	}
 
+	update(): void {
+		console.log("TODO");
+	}
+
 	getSvgElement(): SVGGElement {
 		if (!this._pos) {
 			throw new Error("Position must be set before inserting the component.");

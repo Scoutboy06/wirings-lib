@@ -6,18 +6,30 @@ import type { GateIO } from "./gates";
 
 export class WireVertex {
 	private wire: Wire;
+	private ioConnection?: GateIO;
 	readonly _pos: Vec2;
 	private idx: number;
 
-	constructor(wire: Wire, x: number, y: number, idx: number) {
+	constructor(
+		wire: Wire,
+		x: number,
+		y: number,
+		idx: number,
+		ioConnection?: GateIO,
+	) {
 		this.wire = wire;
 		this._pos = new Vec2(x, y);
 		this.idx = idx;
+		this.ioConnection = ioConnection;
 	}
 
 	enable(): void {
 		this.wire.setState(true);
 		this.wire.update();
+		if (this.ioConnection && !this.ioConnection.state) {
+			this.ioConnection.setState(true);
+			this.ioConnection.update();
+		}
 	}
 }
 
@@ -30,13 +42,19 @@ export class Wire extends Component {
 		this.id = `wire-${this.id}`;
 	}
 
-	via(node: GateIO): Wire {
-		if (!node._pos) {
+	via(gate: GateIO): Wire {
+		if (!gate._pos) {
 			throw new Error("Node position is not set");
 		}
-		this.vertices.push(
-			new WireVertex(this, node._pos.x, node._pos.y, this.vertices.length),
+		const vertex = new WireVertex(
+			this,
+			gate._pos.x,
+			gate._pos.y,
+			this.vertices.length,
+			gate,
 		);
+		this.vertices.push(vertex);
+		gate.connect(vertex);
 		return this;
 	}
 
@@ -57,9 +75,7 @@ export class Wire extends Component {
 			if (!this.state) continue;
 
 			const len = vertex._pos.sub(prevVertex._pos).length();
-			console.log("Wire segment length:", len);
 			const numElectrons = Math.floor(len * 0.05);
-			console.log(numElectrons);
 
 			for (let j = 0; j < numElectrons; j++) {
 				const t = (j + 1) / (numElectrons + 1);
