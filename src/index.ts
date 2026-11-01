@@ -55,11 +55,11 @@ export default class WiringDiagram {
 		);
 
 		wires.forEach((component) => {
-			console.log(component);
+			// console.log(component);
 			svg.addElement(component.getSvgElement());
 		});
 		nonWires.forEach((component) => {
-			console.log(component);
+			// console.log(component);
 			svg.addElement(component.getSvgElement());
 		});
 
